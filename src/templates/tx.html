@@ -2,10 +2,10 @@
 <div class="center">
      <h3 style="font-size: 12px; margin-top: 20px">
      {{#refresh}}
-         <a href="/tx/{{tx_hash}}">Autorefresh is ON (10 s)</a>
+         <a href="/tx/{{tx_hash}}?lang={{lang}}">{{t_index_autorefresh_on}}</a>
      {{/refresh}}
      {{^refresh}}
-        <a href="/tx/{{tx_hash}}/autorefresh">Autorefresh is OFF</a>
+        <a href="/tx/{{tx_hash}}/autorefresh?lang={{lang}}">{{t_index_autorefresh_off}}</a>
      {{/refresh}}
      </h3>
 </div>
@@ -13,14 +13,14 @@
 <div>
 
     {{#has_error}}
-        <h4 style="color:red">Attempt failed</h4>
+        <h4 style="color:red">{{t_common_attempt_failed}}</h4>
         {{#error_tx_not_found}}
-            <h4>Tx {{tx_hash}} not found. </h4>
+            <h4>{{t_tx_not_found_prefix}} {{tx_hash}} {{t_tx_not_found_suffix}}</h4>
             <div class="center" style="text-align: center;width:80%">
-                <p> If this is newly made tx, it can take some time (up to minute)
-                    for it to get propagated to all nodes' txpools.
+                <p> {{t_tx_not_found_hint_1}}
+                    {{t_tx_not_found_hint_2}}
                     <br/><br/>
-                    Please refresh in 10-20 seconds to check if its here then.
+                    {{t_tx_not_found_hint_3}}
                 </p>
             </div>
         {{/error_tx_not_found}}

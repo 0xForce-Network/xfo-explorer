@@ -1,23 +1,23 @@
 <div>
     <div class="center">
         <br/>
-        <h3 class="center">Signed Outputs Public Keys Checker</h3>
+        <h3 class="center">{{t_rawoutputkeys_title}}</h3>
     </div>
 
 
     <div class="center">
-        <form action="/checkrawoutputkeys" method="post" style="width:100%; margin-top:15px" class="style-1">
-            Paste base64 encoded, signed output keys data here<br/>
-            (In Linux, can get base64 signed raw tx data: <i>base64 your_output_keys_filename | xclip -selection clipboard</i>)<br/>
-            (In Windows, can get base64 signed raw tx data: <i>certutil.exe -encode -f your_output_keys_filename encoded.txt & type "encoded.txt" | clip</i>)<br/>
+        <form action="/checkrawoutputkeys?lang={{lang}}" method="post" style="width:100%; margin-top:15px" class="style-1">
+            {{t_rawoutputkeys_intro}}<br/>
+            {{t_rawoutputkeys_linux_hint}}<br/>
+            {{t_rawoutputkeys_windows_hint}}<br/>
             <textarea name="rawoutputkeysdata" rows="20" cols="80"></textarea><br/><br/>
-            Viewkey (<i>output keys file data is encoded using your viewkey. Thus is needed for decryption</i>)
+            {{t_rawoutputkeys_viewkey_label}}
             <br/>
-            Note: data and viewkey are sent to the server, as the calculations are done on the server side
+            {{t_rawoutputkeys_server_note}}
             <br/>
             <input type="text"  name="viewkey" size="80">
             <br/>
-            <input type="submit" name="action" value="check">
+            <button type="submit" name="action" value="check">{{t_common_check}}</button>
         </form>
     </div>
 

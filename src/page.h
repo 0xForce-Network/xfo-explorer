@@ -69,11 +69,12 @@ inline thread_local RandomXThreadCleanup rx_thread_cleanup;
 #include <ctime>
 #include <future>
 #include <type_traits>
+#include <unordered_map>
 
 
 #define TMPL_DIR                    "./templates"
 #define TMPL_PARIALS_DIR            TMPL_DIR "/partials"
-#define TMPL_CSS_STYLES             TMPL_DIR "/css/style.css"
+#define TMPL_CSS_STYLES             TMPL_DIR "/css/terminal.css"
 #define TMPL_INDEX                  TMPL_DIR "/index.html"
 #define TMPL_INDEX2                 TMPL_DIR "/index2.html"
 #define TMPL_MEMPOOL                TMPL_DIR "/mempool.html"
@@ -137,6 +138,15 @@ struct OutputIndicesReturnVectOfVectT<
                 uint64_t{}, size_t{})
             .front().front())
     >>: std::true_type 
+{};
+
+
+template<typename T, typename = VoidT<>>
+struct HasPowTypeT : std::false_type
+{};
+
+template<typename T>
+struct HasPowTypeT<T, VoidT<decltype(std::declval<T>().pow_type)>> : std::true_type
 {};
 
 
@@ -519,7 +529,18 @@ string js_html_files_all_in_one;
 // read operation in OS
 map<string, string> template_file;
 
+using i18n_catalog_t = std::unordered_map<string, std::unordered_map<string, string>>;
+i18n_catalog_t i18n_catalog;
+
+inline static thread_local std::string request_locale {"en"};
+
 public:
+
+void
+set_request_locale(string locale)
+{
+    request_locale = normalize_locale(std::move(locale));
+}
 
 page(MicroCore* _mcore,
      Blockchain* _core_storage,
@@ -591,6 +612,8 @@ page(MicroCore* _mcore,
     template_file["tx_details"]      = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_details.html");
     template_file["tx_table_header"] = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_header.html");
     template_file["tx_table_row"]    = xmreg::read(string(TMPL_PARIALS_DIR) + "/tx_table_row.html");
+
+    load_i18n_catalog();
 }
 
 /**
@@ -682,6 +705,7 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
 
         string blk_size_str = fmt::format("{:0.2f}", blk_size);
         string blk_no_txs_str = std::to_string(blk.tx_hashes.size());
+        const uint64_t blk_pow_type = get_pow_type(blk);
 
         blk_sizes.push_back(blk_size);
 
@@ -730,6 +754,9 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
             txd_map.insert({"rct_type"  , tx.rct_signatures.type});
             txd_map.insert({"blk_size"  , blk_size_str});
             txd_map.insert({"no_txs"    , blk_no_txs_str});
+            txd_map.insert({"pow_type"  , blk_pow_type});
+            txd_map.insert({"is_cpu_block", (blk_pow_type == 0)});
+            txd_map.insert({"is_gpu_block", (blk_pow_type > 0)});
 
 
             // do not show block info for other than first tx in a block
@@ -1133,6 +1160,7 @@ show_block(uint64_t _blk_height)
 
     string blk_pow_hash_str = pod_to_hex(get_block_longhash(core_storage, blk, _blk_height, 0));
     cryptonote::difficulty_type blk_difficulty = core_storage->get_db().get_block_difficulty(_blk_height);
+    const uint64_t pow_type = get_pow_type(blk);
 
     mstch::map context {
             {"testnet"              , testnet},
@@ -1153,6 +1181,9 @@ show_block(uint64_t _blk_height)
             {"delta_time"           , delta_time},
             {"blk_nonce"            , blk.nonce},
             {"blk_pow_hash"         , blk_pow_hash_str},
+            {"pow_type"             , pow_type},
+            {"is_cpu_block"         , (pow_type == 0)},
+            {"is_gpu_block"         , (pow_type > 0)},
             {"is_randomx"           , (blk.major_version >= 12
                                             && enable_randomx == true)},
             {"blk_difficulty"       , blk_difficulty.str()},
@@ -1217,9 +1248,14 @@ show_block(uint64_t _blk_height)
     context["sum_fees"]
             = xmreg::xmr_amount_to_str(sum_fees, "{:0.6f}", false);
 
-    // get xmr in the block reward
-    context["blk_reward"]
-            = xmreg::xmr_amount_to_str(txd_coinbase.xmr_outputs - sum_fees, "{:0.6f}");
+    // split reward into miner reward and governance tax buckets.
+    const uint64_t total_reward = txd_coinbase.xmr_outputs - sum_fees;
+    const uint64_t governance_tax = total_reward / 5; // 20%
+    const uint64_t miner_reward = total_reward - governance_tax;
+
+    context["blk_reward_total"] = xmreg::xmr_amount_to_str(total_reward, "{:0.6f}");
+    context["governance_tax"] = xmreg::xmr_amount_to_str(governance_tax, "{:0.6f}");
+    context["blk_reward"] = xmreg::xmr_amount_to_str(miner_reward, "{:0.6f}");
 
     add_css_style(context);
 
@@ -4878,6 +4914,7 @@ json_block(string block_no_or_hash)
     j_data = json {
             {"block_height"  , block_height},
             {"hash"          , pod_to_hex(blk_hash)},
+            {"pow_type"      , get_pow_type(blk)},
             {"timestamp"     , blk.timestamp},
             {"timestamp_utc" , xmreg::timestamp_to_str_gm(blk.timestamp)},
             {"block_height"  , block_height},
@@ -5845,6 +5882,209 @@ json_version()
 
 
 private:
+
+void
+load_i18n_catalog()
+{
+    i18n_catalog.clear();
+
+    for (const string& locale: {string{"en"}, string{"zh-TW"}, string{"es"}})
+    {
+        const string path = string("./public/locales/") + locale + "/translation.json";
+        try
+        {
+            const string raw = xmreg::read(path);
+            if (raw.empty())
+                continue;
+
+            const auto parsed = nlohmann::json::parse(raw);
+            if (!parsed.is_object())
+                continue;
+
+            for (auto it = parsed.begin(); it != parsed.end(); ++it)
+            {
+                if (it.value().is_string())
+                    i18n_catalog[locale][it.key()] = it.value().get<string>();
+            }
+        }
+        catch (const std::exception&)
+        {
+            // keep fallback behavior below
+        }
+    }
+
+    if (i18n_catalog["en"].empty())
+    {
+        i18n_catalog["en"] = {
+                {"common.search", "Search"},
+                {"common.ago", "ago"},
+                {"header.title", "ForceScan // 0xForce Explorer"},
+                {"header.tagline", "no javascript · no cookies · no trackers · c++ native"},
+                {"header.search_placeholder", "block height | block hash | transaction hash"},
+                {"header.lang_label", "Language"},
+                {"index.server_time", "Server time"},
+                {"index.transaction_pool", "Transaction pool"},
+                {"index.transaction_pusher", "Transaction pusher"},
+                {"index.key_images_checker", "Key images checker"},
+                {"index.output_keys_checker", "Output keys checker"},
+                {"index.autorefresh_on", "Autorefresh is ON (10 s)"},
+                {"index.autorefresh_off", "Autorefresh is OFF"},
+                {"index.go_testnet", "Go to testnet explorer"},
+                {"index.go_stagenet", "Go to stagenet explorer"},
+                {"index.go_mainnet", "Go to mainnet explorer"},
+                {"index.this_is_testnet", "This is testnet blockchain"},
+                {"index.this_is_stagenet", "This is stagenet blockchain"},
+                {"index.network_difficulty", "Network difficulty"},
+                {"index.hard_fork", "Hard fork"},
+                {"index.hash_rate", "Hash rate"},
+                {"index.fee_per_byte", "Fee per byte"},
+                {"index.median_block_size_limit", "Median block size limit"},
+                {"index.data_from", "Data from"},
+                {"index.xfo_emission", "XFO emission (fees) is"},
+                {"index.as_of_block", "as of"},
+                {"index.block_word", "block"},
+                {"index.terminal_feed_last", "Terminal Feed: last"},
+                {"index.terminal_feed_blocks", "blocks"},
+                {"index.terminal_feed_historical", "Terminal Feed: historical blocks"},
+                {"index.median_size_100", "Median size of 100 blocks"},
+                {"index.height", "height"},
+                {"index.age", "age"},
+                {"index.size_kb", "size [kB]"},
+                {"index.no_txs", "no txs"},
+                {"index.transaction_hash", "transaction hash"},
+                {"index.fee_micro", "fee [μxfo]"},
+                {"index.outputs", "outputs"},
+                {"index.in_out", "in/out"},
+                {"index.tx_size_kb", "tx size [kB]"},
+                {"index.pow", "pow"},
+                {"index.cpu_randomx", "CPU · RandomX"},
+                {"index.gpu_oracle", "GPU · Oracle"},
+                {"index.previous_page", "previous page"},
+                {"index.first_page", "first page"},
+                {"index.current_page", "current page"},
+                {"index.next_page", "next page"},
+                {"mempool.title", "Transaction pool"},
+                {"mempool.summary_prefix", "no of txs"},
+                {"mempool.summary_size", "size"},
+                {"mempool.summary_updated_every", "updated every"},
+                {"mempool.summary_seconds", "seconds"},
+                {"mempool.age_hms", "age [h:m:s]"},
+                {"mempool.fee_per_kb_micro", "fee/per_kB [μxfo]"},
+                {"mempool.only_partial_shown", "Only"},
+                {"mempool.partial_suffix", "txs shown. Click here to see all of them"},
+                {"block.block_hash_height", "Block hash (height)"},
+                {"block.previous_block", "Previous block"},
+                {"block.next_block", "Next block"},
+                {"block.timestamp_utc_epoch", "Timestamp [UTC] (epoch)"},
+                {"block.delta_hms", "Δ [h:m:s]"},
+                {"block.major_minor_version", "Major.minor version"},
+                {"block.miner_reward", "Miner reward"},
+                {"block.block_size_kb", "Block size [kB]"},
+                {"block.nonce", "nonce"},
+                {"block.total_fees", "Total fees"},
+                {"block.no_of_txs", "No of txs"},
+                {"block.reward_total", "Reward total"},
+                {"block.governance_tax", "Governance tax (20%)"},
+                {"block.pow_mode", "PoW mode"},
+                {"block.pow_hash", "PoW hash"},
+                {"block.difficulty", "Difficulty"},
+                {"block.randomx_source_code", "RandomX source code"},
+                {"block.miner_reward_transaction", "Miner reward transaction"},
+                {"block.transactions", "Transactions"},
+                {"block.block_as_hex", "Block as hex"},
+                {"block.complete_block_as_hex", "Complete block as hex"},
+                {"footer.base_source", "base source"},
+                {"footer.build", "ForceScan build"},
+                {"footer.compat", "xfo-core compat"},
+                {"common.check", "Check"},
+                {"common.push", "Push"},
+                {"common.success", "Success"},
+                {"common.attempt_failed", "Attempt failed"},
+                {"common.viewkey", "Viewkey"},
+                {"rawtx.title", "Transaction Pusher"},
+                {"rawtx.intro_1", "Paste here either a hex string of raw transaction"},
+                {"rawtx.intro_2", "(the tx_blob response in wallet RPC, or raw_monero_tx file from wallet CLI --do-not-relay),"},
+                {"rawtx.intro_3", "or base64 encoded unsigned/signed transaction data"},
+                {"rawtx.linux_hint", "(Linux) cat raw_monero_tx | xclip -selection clipboard"},
+                {"rawtx.windows_hint", "(Windows) certutil.exe -encode -f raw_monero_tx encoded.txt & type \"encoded.txt\" | clip"},
+                {"rawtx.note_server_side", "Note: data is sent to the server, as calculations are done server-side"},
+                {"rawtx.note_check_hex", "Note: check does not work for raw transaction hex strings"},
+                {"pushrawtx.attempting", "Attempting to push tx"},
+                {"pushrawtx.success_line1", "Your tx should already be in txpool"},
+                {"pushrawtx.success_line2", "waiting to be included in an upcoming block."},
+                {"pushrawtx.go_to_tx", "Go to tx"},
+                {"rawkeyimgs.title", "Signed Key Images Checker"},
+                {"rawkeyimgs.intro", "Paste base64 encoded signed key images data here"},
+                {"rawkeyimgs.linux_hint", "(Linux) base64 your_key_images_file | xclip -selection clipboard"},
+                {"rawkeyimgs.windows_hint", "(Windows) certutil.exe -encode -f your_key_images_file encoded.txt & type \"encoded.txt\" | clip"},
+                {"rawkeyimgs.viewkey_label", "Viewkey (needed to decrypt key image file data)"},
+                {"rawkeyimgs.server_note", "Note: data and viewkey are sent to server for processing"},
+                {"rawoutputkeys.title", "Signed Outputs Public Keys Checker"},
+                {"rawoutputkeys.intro", "Paste base64 encoded signed output keys data here"},
+                {"rawoutputkeys.linux_hint", "(Linux) base64 your_output_keys_filename | xclip -selection clipboard"},
+                {"rawoutputkeys.windows_hint", "(Windows) certutil.exe -encode -f your_output_keys_filename encoded.txt & type \"encoded.txt\" | clip"},
+                {"rawoutputkeys.viewkey_label", "Viewkey (needed to decrypt output keys file data)"},
+                {"rawoutputkeys.server_note", "Note: data and viewkey are sent to server for processing"},
+                {"checkraw.common_data_prefix", "Data file prefix"},
+                {"checkrawkeyimgs.for_address", "Key images for address"},
+                {"checkrawkeyimgs.key_no", "Key no."},
+                {"checkrawkeyimgs.key_image", "Key image"},
+                {"checkrawkeyimgs.is_spent", "Is spent?"},
+                {"checkrawoutputkeys.for_address", "Output keys for address"},
+                {"checkrawoutputkeys.total_xmr", "Total xmr"},
+                {"checkrawoutputkeys.output_no", "Output no."},
+                {"checkrawoutputkeys.public_key", "Public key"},
+                {"checkrawoutputkeys.timestamp", "Timestamp"},
+                {"checkrawoutputkeys.amount", "Amount"},
+                {"tx.not_found_prefix", "Tx"},
+                {"tx.not_found_suffix", "not found."},
+                {"tx.not_found_hint_1", "If this is a newly made tx, propagation to all nodes' txpools can take some time."},
+                {"tx.not_found_hint_2", "This can take up to about one minute."},
+                {"tx.not_found_hint_3", "Please refresh in 10-20 seconds and try again."},
+                {"mempool.error_intro_1", "Txpool data preparation for the front page failed."},
+                {"mempool.error_intro_2", "Its processing"},
+                {"mempool.error_intro_3", "took longer than expected and timed out."},
+                {"mempool.error_intro_4", "To view txpool without time constraints,"},
+                {"mempool.error_intro_5", "go to dedicated txpool page:"},
+                {"mempool.error_memory_pool", "memory pool"}
+        };
+    }
+}
+
+string
+normalize_locale(string locale) const
+{
+    boost::algorithm::trim(locale);
+    if (locale == "zh" || locale == "zh-TW" || locale == "zh_tw")
+        return "zh-TW";
+    if (locale == "es" || locale == "es-ES" || locale == "es_es")
+        return "es";
+    return "en";
+}
+
+string
+translate(const string& key) const
+{
+    const string locale = normalize_locale(request_locale);
+
+    auto locale_it = i18n_catalog.find(locale);
+    if (locale_it != i18n_catalog.end())
+    {
+        auto key_it = locale_it->second.find(key);
+        if (key_it != locale_it->second.end())
+            return key_it->second;
+    }
+
+    auto en_it = i18n_catalog.find("en");
+    if (en_it != i18n_catalog.end())
+    {
+        auto key_it = en_it->second.find(key);
+        if (key_it != en_it->second.end())
+            return key_it->second;
+    }
+
+    return key;
+}
 
 
 string
@@ -6946,21 +7186,7 @@ are_absolute_offsets_good(
 string
 get_footer()
 {
-    // set last git commit date based on
-    // autogenrated version.h during compilation
-    static const mstch::map footer_context {
-            {"last_git_commit_hash", string {GIT_COMMIT_HASH}},
-            {"last_git_commit_date", string {GIT_COMMIT_DATETIME}},
-            {"git_branch_name"     , string {GIT_BRANCH_NAME}},
-            {"monero_version_full" , string {MONERO_VERSION_FULL}},
-            {"api"                 , std::to_string(ONIONEXPLORER_RPC_VERSION_MAJOR)
-                                     + "."
-                                     + std::to_string(ONIONEXPLORER_RPC_VERSION_MINOR)},
-    };
-
-    string footer_html = mstch::render(xmreg::read(TMPL_FOOTER), footer_context);
-
-    return footer_html;
+    return xmreg::read(TMPL_FOOTER);
 }
 
 void
@@ -6971,6 +7197,147 @@ add_css_style(mstch::map& context)
     context["css_styles"] = mstch::lambda{[&](const std::string& text) -> mstch::node {
         return template_file["css_styles"];
     }};
+
+    const string locale = normalize_locale(request_locale);
+    context["lang"] = locale;
+    context["t_common_search"] = translate("common.search");
+    context["t_common_ago"] = translate("common.ago");
+    context["t_header_title"] = translate("header.title");
+    context["t_header_tagline"] = translate("header.tagline");
+    context["t_header_search_placeholder"] = translate("header.search_placeholder");
+    context["t_header_lang_label"] = translate("header.lang_label");
+    context["t_index_server_time"] = translate("index.server_time");
+    context["t_index_transaction_pool"] = translate("index.transaction_pool");
+    context["t_index_transaction_pusher"] = translate("index.transaction_pusher");
+    context["t_index_key_images_checker"] = translate("index.key_images_checker");
+    context["t_index_output_keys_checker"] = translate("index.output_keys_checker");
+    context["t_index_autorefresh_on"] = translate("index.autorefresh_on");
+    context["t_index_autorefresh_off"] = translate("index.autorefresh_off");
+    context["t_index_go_testnet"] = translate("index.go_testnet");
+    context["t_index_go_stagenet"] = translate("index.go_stagenet");
+    context["t_index_go_mainnet"] = translate("index.go_mainnet");
+    context["t_index_this_is_testnet"] = translate("index.this_is_testnet");
+    context["t_index_this_is_stagenet"] = translate("index.this_is_stagenet");
+    context["t_index_network_difficulty"] = translate("index.network_difficulty");
+    context["t_index_hard_fork"] = translate("index.hard_fork");
+    context["t_index_hash_rate"] = translate("index.hash_rate");
+    context["t_index_fee_per_byte"] = translate("index.fee_per_byte");
+    context["t_index_median_block_size_limit"] = translate("index.median_block_size_limit");
+    context["t_index_data_from"] = translate("index.data_from");
+    context["t_index_xfo_emission"] = translate("index.xfo_emission");
+    context["t_index_as_of_block"] = translate("index.as_of_block");
+    context["t_index_block_word"] = translate("index.block_word");
+    context["t_index_terminal_feed_last"] = translate("index.terminal_feed_last");
+    context["t_index_terminal_feed_blocks"] = translate("index.terminal_feed_blocks");
+    context["t_index_terminal_feed_historical"] = translate("index.terminal_feed_historical");
+    context["t_index_median_size_100"] = translate("index.median_size_100");
+    context["t_index_height"] = translate("index.height");
+    context["t_index_age"] = translate("index.age");
+    context["t_index_size_kb"] = translate("index.size_kb");
+    context["t_index_no_txs"] = translate("index.no_txs");
+    context["t_index_transaction_hash"] = translate("index.transaction_hash");
+    context["t_index_fee_micro"] = translate("index.fee_micro");
+    context["t_index_outputs"] = translate("index.outputs");
+    context["t_index_in_out"] = translate("index.in_out");
+    context["t_index_tx_size_kb"] = translate("index.tx_size_kb");
+    context["t_index_pow"] = translate("index.pow");
+    context["t_index_cpu_randomx"] = translate("index.cpu_randomx");
+    context["t_index_gpu_oracle"] = translate("index.gpu_oracle");
+    context["t_index_previous_page"] = translate("index.previous_page");
+    context["t_index_first_page"] = translate("index.first_page");
+    context["t_index_current_page"] = translate("index.current_page");
+    context["t_index_next_page"] = translate("index.next_page");
+    context["t_mempool_title"] = translate("mempool.title");
+    context["t_mempool_summary_prefix"] = translate("mempool.summary_prefix");
+    context["t_mempool_summary_size"] = translate("mempool.summary_size");
+    context["t_mempool_summary_updated_every"] = translate("mempool.summary_updated_every");
+    context["t_mempool_summary_seconds"] = translate("mempool.summary_seconds");
+    context["t_mempool_age_hms"] = translate("mempool.age_hms");
+    context["t_mempool_fee_per_kb_micro"] = translate("mempool.fee_per_kb_micro");
+    context["t_mempool_only_partial_shown"] = translate("mempool.only_partial_shown");
+    context["t_mempool_partial_suffix"] = translate("mempool.partial_suffix");
+    context["t_block_block_hash_height"] = translate("block.block_hash_height");
+    context["t_block_previous_block"] = translate("block.previous_block");
+    context["t_block_next_block"] = translate("block.next_block");
+    context["t_block_timestamp_utc_epoch"] = translate("block.timestamp_utc_epoch");
+    context["t_block_delta_hms"] = translate("block.delta_hms");
+    context["t_block_major_minor_version"] = translate("block.major_minor_version");
+    context["t_block_miner_reward"] = translate("block.miner_reward");
+    context["t_block_block_size_kb"] = translate("block.block_size_kb");
+    context["t_block_nonce"] = translate("block.nonce");
+    context["t_block_total_fees"] = translate("block.total_fees");
+    context["t_block_no_of_txs"] = translate("block.no_of_txs");
+    context["t_block_reward_total"] = translate("block.reward_total");
+    context["t_block_governance_tax"] = translate("block.governance_tax");
+    context["t_block_pow_mode"] = translate("block.pow_mode");
+    context["t_block_pow_hash"] = translate("block.pow_hash");
+    context["t_block_difficulty"] = translate("block.difficulty");
+    context["t_block_randomx_source_code"] = translate("block.randomx_source_code");
+    context["t_block_miner_reward_transaction"] = translate("block.miner_reward_transaction");
+    context["t_block_transactions"] = translate("block.transactions");
+    context["t_block_block_as_hex"] = translate("block.block_as_hex");
+    context["t_block_complete_block_as_hex"] = translate("block.complete_block_as_hex");
+    context["t_footer_base_source"] = translate("footer.base_source");
+    context["t_footer_build"] = translate("footer.build");
+    context["t_footer_compat"] = translate("footer.compat");
+    context["t_common_check"] = translate("common.check");
+    context["t_common_push"] = translate("common.push");
+    context["t_common_success"] = translate("common.success");
+    context["t_common_attempt_failed"] = translate("common.attempt_failed");
+    context["t_common_viewkey"] = translate("common.viewkey");
+    context["t_rawtx_title"] = translate("rawtx.title");
+    context["t_rawtx_intro_1"] = translate("rawtx.intro_1");
+    context["t_rawtx_intro_2"] = translate("rawtx.intro_2");
+    context["t_rawtx_intro_3"] = translate("rawtx.intro_3");
+    context["t_rawtx_linux_hint"] = translate("rawtx.linux_hint");
+    context["t_rawtx_windows_hint"] = translate("rawtx.windows_hint");
+    context["t_rawtx_note_server_side"] = translate("rawtx.note_server_side");
+    context["t_rawtx_note_check_hex"] = translate("rawtx.note_check_hex");
+    context["t_pushrawtx_attempting"] = translate("pushrawtx.attempting");
+    context["t_pushrawtx_success_line1"] = translate("pushrawtx.success_line1");
+    context["t_pushrawtx_success_line2"] = translate("pushrawtx.success_line2");
+    context["t_pushrawtx_go_to_tx"] = translate("pushrawtx.go_to_tx");
+    context["t_rawkeyimgs_title"] = translate("rawkeyimgs.title");
+    context["t_rawkeyimgs_intro"] = translate("rawkeyimgs.intro");
+    context["t_rawkeyimgs_linux_hint"] = translate("rawkeyimgs.linux_hint");
+    context["t_rawkeyimgs_windows_hint"] = translate("rawkeyimgs.windows_hint");
+    context["t_rawkeyimgs_viewkey_label"] = translate("rawkeyimgs.viewkey_label");
+    context["t_rawkeyimgs_server_note"] = translate("rawkeyimgs.server_note");
+    context["t_rawoutputkeys_title"] = translate("rawoutputkeys.title");
+    context["t_rawoutputkeys_intro"] = translate("rawoutputkeys.intro");
+    context["t_rawoutputkeys_linux_hint"] = translate("rawoutputkeys.linux_hint");
+    context["t_rawoutputkeys_windows_hint"] = translate("rawoutputkeys.windows_hint");
+    context["t_rawoutputkeys_viewkey_label"] = translate("rawoutputkeys.viewkey_label");
+    context["t_rawoutputkeys_server_note"] = translate("rawoutputkeys.server_note");
+    context["t_checkraw_common_data_prefix"] = translate("checkraw.common_data_prefix");
+    context["t_checkrawkeyimgs_for_address"] = translate("checkrawkeyimgs.for_address");
+    context["t_checkrawkeyimgs_key_no"] = translate("checkrawkeyimgs.key_no");
+    context["t_checkrawkeyimgs_key_image"] = translate("checkrawkeyimgs.key_image");
+    context["t_checkrawkeyimgs_is_spent"] = translate("checkrawkeyimgs.is_spent");
+    context["t_checkrawoutputkeys_for_address"] = translate("checkrawoutputkeys.for_address");
+    context["t_checkrawoutputkeys_total_xmr"] = translate("checkrawoutputkeys.total_xmr");
+    context["t_checkrawoutputkeys_output_no"] = translate("checkrawoutputkeys.output_no");
+    context["t_checkrawoutputkeys_public_key"] = translate("checkrawoutputkeys.public_key");
+    context["t_checkrawoutputkeys_timestamp"] = translate("checkrawoutputkeys.timestamp");
+    context["t_checkrawoutputkeys_amount"] = translate("checkrawoutputkeys.amount");
+    context["t_tx_not_found_prefix"] = translate("tx.not_found_prefix");
+    context["t_tx_not_found_suffix"] = translate("tx.not_found_suffix");
+    context["t_tx_not_found_hint_1"] = translate("tx.not_found_hint_1");
+    context["t_tx_not_found_hint_2"] = translate("tx.not_found_hint_2");
+    context["t_tx_not_found_hint_3"] = translate("tx.not_found_hint_3");
+    context["t_mempool_error_intro_1"] = translate("mempool.error_intro_1");
+    context["t_mempool_error_intro_2"] = translate("mempool.error_intro_2");
+    context["t_mempool_error_intro_3"] = translate("mempool.error_intro_3");
+    context["t_mempool_error_intro_4"] = translate("mempool.error_intro_4");
+    context["t_mempool_error_intro_5"] = translate("mempool.error_intro_5");
+    context["t_mempool_error_memory_pool"] = translate("mempool.error_memory_pool");
+    context["last_git_commit_hash"] = string {GIT_COMMIT_HASH};
+    context["last_git_commit_date"] = string {GIT_COMMIT_DATETIME};
+    context["git_branch_name"] = string {GIT_BRANCH_NAME};
+    context["monero_version_full"] = string {MONERO_VERSION_FULL};
+    context["api"] = std::to_string(ONIONEXPLORER_RPC_VERSION_MAJOR)
+                     + "."
+                     + std::to_string(ONIONEXPLORER_RPC_VERSION_MINOR);
 }
 
 bool
@@ -7006,6 +7373,18 @@ get_tx(string const& tx_hash_str,
     }
 
     return true;
+}
+
+template<typename T = block>
+static uint64_t
+get_pow_type(const T& blk)
+{
+    if constexpr (HasPowTypeT<T>::value)
+    {
+        return static_cast<uint64_t>(blk.pow_type);
+    }
+
+    return 0;
 }
 
 vector<randomx_status>

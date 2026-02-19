@@ -1,40 +1,40 @@
 
-<div class="center">
+<div class="center glass-panel bg-surface border-primary backdrop-blur-md">
      <h3 style="font-size: 12px; margin-top: 20px">
 
-        Server time: {{server_timestamp}}  | <a href="/txpool">Transaction pool</a>
+        {{t_index_server_time}}: {{server_timestamp}}  | <a href="/txpool?lang={{lang}}">{{t_index_transaction_pool}}</a>
          {{#enable_pusher}}
-            | <a href="/rawtx">Transaction pusher </a>
+            | <a href="/rawtx?lang={{lang}}">{{t_index_transaction_pusher}}</a>
          {{/enable_pusher}}
          {{#enable_key_image_checker}}
-            | <a href="/rawkeyimgs">Key images checker</a>
+            | <a href="/rawkeyimgs?lang={{lang}}">{{t_index_key_images_checker}}</a>
          {{/enable_key_image_checker}}
          {{#enable_output_key_checker}}
-            | <a href="/rawoutputkeys">Output keys checker</a>
+            | <a href="/rawoutputkeys?lang={{lang}}">{{t_index_output_keys_checker}}</a>
          {{/enable_output_key_checker}}
          {{#enable_autorefresh_option}}
              |
             {{#refresh}}
-                <a href="/">Autorefresh is ON (10 s)</a>
+                <a href="/?lang={{lang}}">{{t_index_autorefresh_on}}</a>
             {{/refresh}}
             {{^refresh}}
-               <a href="/autorefresh">Autorefresh is OFF</a>
+               <a href="/autorefresh?lang={{lang}}">{{t_index_autorefresh_off}}</a>
             {{/refresh}}
          {{/enable_autorefresh_option}}
          {{#testnet_url}}
-            | <a href="{{testnet_url}}">Go to testnet explorer</a>
+            | <a href="{{testnet_url}}">{{t_index_go_testnet}}</a>
          {{/testnet_url}}
          {{#stagenet_url}}
-            | <a href="{{stagenet_url}}">Go to stagenet explorer</a>
+            | <a href="{{stagenet_url}}">{{t_index_go_stagenet}}</a>
          {{/stagenet_url}}
          {{#mainnet_url}}
-            | <a href="{{mainnet_url}}">Go to mainnet explorer</a>
+            | <a href="{{mainnet_url}}">{{t_index_go_mainnet}}</a>
          {{/mainnet_url}}
          {{#testnet}}
-            | This is <span style="color:#ff6b62">testnet</span> blockchain
+            | {{t_index_this_is_testnet}}
          {{/testnet}}
          {{#stagenet}}
-            | This is <span style="color:#ff6b62">stagenet</span> blockchain
+            | {{t_index_this_is_stagenet}}
          {{/stagenet}}
 
         </h3>
@@ -42,20 +42,20 @@
 
     {{#network_info}}
         <h3 style="font-size: 12px; margin-top: 5px; margin-bottom: 3">
-            Network difficulty: {{difficulty}}
-            | Hard fork: v{{current_hf_version}}
-            | Hash rate: {{hash_rate}}
-            | Fee per byte: {{fee_per_kb}}
-            | Median block size limit: {{block_size_limit}} kB
+            {{t_index_network_difficulty}}: {{difficulty}}
+            | {{t_index_hard_fork}}: v{{current_hf_version}}
+            | {{t_index_hash_rate}}: {{hash_rate}}
+            | {{t_index_fee_per_byte}}: {{fee_per_kb}}
+            | {{t_index_median_block_size_limit}}: {{block_size_limit}} kB
             {{^is_current_info}}
-            | Data from {{age}} {{age_format}} ago
+            | {{t_index_data_from}} {{age}} {{age_format}} {{t_common_ago}}
             {{/is_current_info}}
         </h3>
     {{/network_info}}
 
     {{#emission}}
         <h3 style="font-size: 12px; margin-top: 2px">
-            Monero emission (fees) is {{amount}} ({{fee_amount}}) as of {{blk_no}} block
+            {{t_index_xfo_emission}} {{amount}} ({{fee_amount}}) {{t_index_as_of_block}} {{blk_no}} {{t_index_block_word}}
         </h3>
     {{/emission}}
 
@@ -65,50 +65,60 @@
     {{{mempool_info}}}
 
     {{#is_page_zero}}
-      <h2 style="margin-bottom: 0px">Transactions in the last {{no_of_last_blocks}} blocks</h2>
+      <h2 class="text-primary" style="margin-bottom: 0px">{{t_index_terminal_feed_last}} {{no_of_last_blocks}} {{t_index_terminal_feed_blocks}}</h2>
     {{/is_page_zero}}
     {{^is_page_zero}}
-      <h2 style="margin-bottom: 0px">Transactions in older blocks<!--(height: {{height}})--></h2>
+      <h2 class="text-primary" style="margin-bottom: 0px">{{t_index_terminal_feed_historical}}</h2>
     {{/is_page_zero}}
 
-    <h4 style="font-size: 14px; margin-top: 0px">(Median size of 100 blocks: {{blk_size_median}} kB)</h4>
+    <h4 class="subtext" style="font-size: 14px; margin-top: 0px">({{t_index_median_size_100}}: {{blk_size_median}} kB)</h4>
 
-    <div class="center">
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
 
             <table class="center">
                 <tr>
-                    <td>height</td>
-                    <td>age {{age_format}}<!--(Δm)--></td>
-                    <td>size [kB]<!--(Δm)--></td>
-                    <td>no txs</td>
-                    <td>transaction hash</td>
-                    <td>fee [&#181;&#x271]</td>
-                    <td>outputs</td>
-                    <td>in/out</td>
-                    <td>tx size [kB]</td>
+                    <td>{{t_index_height}}</td>
+                    <td>{{t_index_age}} {{age_format}}<!--(Δm)--></td>
+                    <td>{{t_index_size_kb}}<!--(Δm)--></td>
+                    <td>{{t_index_no_txs}}</td>
+                    <td>{{t_index_transaction_hash}}</td>
+                    <td>{{t_index_fee_micro}}</td>
+                    <td>{{t_index_outputs}}</td>
+                    <td>{{t_index_in_out}}</td>
+                    <td>{{t_index_tx_size_kb}}</td>
+                    <td>{{t_index_pow}}</td>
                 </tr>
                 {{#txs}}
-                <tr>
-                    <td><a href="/block/{{height}}">{{height}}</a></td>
+                {{#is_gpu_block}}
+                <tr class="pow-gpu">
+                {{/is_gpu_block}}
+                {{^is_gpu_block}}
+                <tr class="pow-cpu">
+                {{/is_gpu_block}}
+                    <td><a href="/block/{{height}}?lang={{lang}}">{{height}}</a></td>
                     <td>{{age}}<!--{{time_delta}}--></td>
                     <td>{{blk_size}}</td>
                     <td>{{no_txs}}</td>
-                    <td><a href="/tx/{{hash}}">{{hash}}</a></td>
+                    <td><a href="/tx/{{hash}}?lang={{lang}}">{{hash}}</a></td>
                     <td>{{fee_micro}}</td>
                     <td>{{sum_outputs_short}}</td>
                     <td>{{no_inputs}}/{{no_outputs}}</td>
                     <td>{{tx_size_short}}</td>
+                    <td>
+                        {{#is_cpu_block}}<span class="badge badge-cpu">{{t_index_cpu_randomx}}</span>{{/is_cpu_block}}
+                        {{#is_gpu_block}}<span class="badge badge-gpu">{{t_index_gpu_oracle}}</span>{{/is_gpu_block}}
+                    </td>
                 </tr>
                 {{/txs}}
             </table>
 
             <div id="pages" class="center" style="text-align: center;">
              {{^is_page_zero}}
-               <a href="/page/{{prev_page}}">previous page</a> |
-               <a href="/">first page</a> |
+               <a href="/page/{{prev_page}}?lang={{lang}}">{{t_index_previous_page}}</a> |
+               <a href="/?lang={{lang}}">{{t_index_first_page}}</a> |
              {{/is_page_zero}}
-                current page: {{page_no}}/<a href="/page/{{total_page_no}}">{{total_page_no}}</a>
-                | <a href="/page/{{next_page}}">next page</a>
+                {{t_index_current_page}}: {{page_no}}/<a href="/page/{{total_page_no}}?lang={{lang}}">{{total_page_no}}</a>
+                | <a href="/page/{{next_page}}?lang={{lang}}">{{t_index_next_page}}</a>
             </div>
 
     </div>

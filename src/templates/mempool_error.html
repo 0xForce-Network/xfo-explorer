@@ -1,15 +1,15 @@
 <h2 style="margin-bottom: 0px">
-   Transaction pool
+   {{t_mempool_title}}
 </h2>
 <h4 style="font-size: 14px; margin-top: 0px"></h4>
 <div class="center info" style="text-align: center;width:80%;color:#949490">
     
-   <p>Txpool data preparation for the front page failed.
-    Its processing
+   <p>{{t_mempool_error_intro_1}}
+    {{t_mempool_error_intro_2}}
        {{#network_info}}{{^is_pool_size_zero}}({{tx_pool_size}} txs){{/is_pool_size_zero}}{{/network_info}}
-       took longer than expected and it timed out.
-    To view the txpool without time constrain,
-    go to dedicated txpool page: <a href="/txpool">memory pool</a>
+       {{t_mempool_error_intro_3}}
+    {{t_mempool_error_intro_4}}
+    {{t_mempool_error_intro_5}} <a href="/txpool?lang={{lang}}">{{t_mempool_error_memory_pool}}</a>
     </p>
 
 

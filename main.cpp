@@ -332,41 +332,54 @@ main(int ac, const char* av[])
                + req.get_header_value("Host");
     };
 
+    auto apply_locale = [&xmrblocks](crow::request const& req)
+    {
+        const char* locale = req.url_params.get("lang");
+        xmrblocks.set_request_locale(locale ? string(locale) : string{"en"});
+    };
+
     CROW_ROUTE(app, "/")
-    ([&]() {
+    ([&](const crow::request& req) {
+        apply_locale(req);
         return myxmr::htmlresponse(xmrblocks.index2());
     });
 
     CROW_ROUTE(app, "/page/<uint>")
-    ([&](size_t page_no) {
+    ([&](const crow::request& req, size_t page_no) {
+        apply_locale(req);
         return myxmr::htmlresponse(xmrblocks.index2(page_no));
     });
 
     CROW_ROUTE(app, "/block/<uint>")
-    ([&](size_t block_height) {
+    ([&](const crow::request& req, size_t block_height) {
+        apply_locale(req);
         return myxmr::htmlresponse(xmrblocks.show_block(block_height));
     });
     
     CROW_ROUTE(app, "/randomx/<uint>")
-    ([&](size_t block_height) {
+    ([&](const crow::request& req, size_t block_height) {
+        apply_locale(req);
         return myxmr::htmlresponse(xmrblocks.show_randomx(block_height));
     });
 
     CROW_ROUTE(app, "/block/<string>")
-    ([&](string block_hash) {
+    ([&](const crow::request& req, string block_hash) {
+        apply_locale(req);
         return myxmr::htmlresponse(
                 xmrblocks.show_block(remove_bad_chars(block_hash)));
     });
 
     CROW_ROUTE(app, "/tx/<string>")
-    ([&](string tx_hash) {
+    ([&](const crow::request& req, string tx_hash) {
+        apply_locale(req);
         return myxmr::htmlresponse(
                 xmrblocks.show_tx(remove_bad_chars(tx_hash)));
     });
     if (enable_autorefresh_option)
     {
         CROW_ROUTE(app, "/tx/<string>/autorefresh")
-        ([&](string tx_hash) {
+        ([&](const crow::request& req, string tx_hash) {
+            apply_locale(req);
             bool refresh_page {true};
             uint16_t with_ring_signatures {0};
             return myxmr::htmlresponse(
@@ -416,8 +429,9 @@ main(int ac, const char* av[])
     }
 
     CROW_ROUTE(app, "/tx/<string>/<uint>")
-    ([&](string tx_hash, uint16_t with_ring_signatures)
+    ([&](const crow::request& req, string tx_hash, uint16_t with_ring_signatures)
      {
+        apply_locale(req);
         return myxmr::htmlresponse(
                 xmrblocks.show_tx(remove_bad_chars(tx_hash), 
                     with_ring_signatures));
@@ -425,7 +439,8 @@ main(int ac, const char* av[])
     if (enable_autorefresh_option)
     {
         CROW_ROUTE(app, "/tx/<string>/<uint>/autorefresh")
-        ([&](string tx_hash, uint16_t with_ring_signature) {
+        ([&](const crow::request& req, string tx_hash, uint16_t with_ring_signature) {
+            apply_locale(req);
             bool refresh_page {true};
             return myxmr::htmlresponse(
                 xmrblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signature, refresh_page));
@@ -530,13 +545,15 @@ main(int ac, const char* av[])
     if (enable_pusher)
     {
         CROW_ROUTE(app, "/rawtx")
-        ([&]() {
+        ([&](const crow::request& req) {
+            apply_locale(req);
             return myxmr::htmlresponse(xmrblocks.show_rawtx());
         });
 
         CROW_ROUTE(app, "/checkandpush").methods("POST"_method)
         ([&](const crow::request& req) -> myxmr::htmlresponse
          {
+            apply_locale(req);
 
             map<std::string, std::string> post_body
                     = xmreg::parse_crow_post_data(req.body);
@@ -564,13 +581,15 @@ main(int ac, const char* av[])
     if (enable_key_image_checker)
     {
         CROW_ROUTE(app, "/rawkeyimgs")
-        ([&]() {
+        ([&](const crow::request& req) {
+            apply_locale(req);
             return myxmr::htmlresponse(xmrblocks.show_rawkeyimgs());
         });
 
         CROW_ROUTE(app, "/checkrawkeyimgs").methods("POST"_method)
         ([&](const crow::request& req) -> myxmr::htmlresponse
          {
+            apply_locale(req);
 
             map<std::string, std::string> post_body
                     = xmreg::parse_crow_post_data(req.body);
@@ -597,13 +616,15 @@ main(int ac, const char* av[])
     if (enable_output_key_checker)
     {
         CROW_ROUTE(app, "/rawoutputkeys")
-        ([&]() {
+        ([&](const crow::request& req) {
+            apply_locale(req);
             return myxmr::htmlresponse(xmrblocks.show_rawoutputkeys());
         });
 
         CROW_ROUTE(app, "/checkrawoutputkeys").methods("POST"_method)
         ([&](const crow::request& req) -> myxmr::htmlresponse
          {
+            apply_locale(req);
 
             map<std::string, std::string> post_body
                     = xmreg::parse_crow_post_data(req.body);
@@ -630,6 +651,7 @@ main(int ac, const char* av[])
 
     CROW_ROUTE(app, "/search").methods("GET"_method)
     ([&](const crow::request& req) {
+        apply_locale(req);
         return myxmr::htmlresponse(
                 xmrblocks.search(
                     remove_bad_chars(
@@ -637,13 +659,15 @@ main(int ac, const char* av[])
     });
 
     CROW_ROUTE(app, "/mempool")
-    ([&]() {
+    ([&](const crow::request& req) {
+        apply_locale(req);
         return myxmr::htmlresponse(xmrblocks.mempool(true));
     });
 
     // alias to  "/mempool"
     CROW_ROUTE(app, "/txpool")
-    ([&]() {
+    ([&](const crow::request& req) {
+        apply_locale(req);
         return myxmr::htmlresponse(xmrblocks.mempool(true));
     });
 
@@ -849,7 +873,8 @@ main(int ac, const char* av[])
     if (enable_autorefresh_option)
     {
         CROW_ROUTE(app, "/autorefresh")
-        ([&]() {
+        ([&](const crow::request& req) {
+            apply_locale(req);
             uint64_t page_no {0};
             bool refresh_page {true};
             return myxmr::htmlresponse(xmrblocks.index2(page_no, refresh_page));

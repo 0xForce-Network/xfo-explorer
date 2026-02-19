@@ -1,3 +1,30 @@
+# ForceScan (0xForce Explorer)
+
+ForceScan is the 0xForce-tailored fork of onion-monero-blockchain-explorer.
+
+Key customizations in this workspace:
+
+- CMake defaults point to local `xfo-core` (`/workspace/xfo-core`).
+- RPC target for local debugging: `ai_devnode:18081` (JSON-RPC).
+- Block context exposes `pow_type` and UI badges (`CPU · RandomX` / `GPU · Oracle`).
+- Block reward split display includes governance tax (20%) and miner reward.
+- Terminal Glass theme is applied via `src/templates/css/terminal.css`.
+- Helper launcher script: `scripts/run_forcescan.sh`.
+
+Quick start (from project root):
+
+```bash
+scripts/run_forcescan.sh
+```
+
+Environment overrides:
+
+- `FORCESCAN_DAEMON_URL` (default: `ai_devnode:18081`)
+- `FORCESCAN_BC_PATH` (default: `/home/monero/.bitmonero/lmdb`)
+- `FORCESCAN_PORT` (default: `8081`)
+
+---
+
 # Onion Monero Blockchain Explorer
 
 Currently available Monero blockchain explorers have several limitations which are of

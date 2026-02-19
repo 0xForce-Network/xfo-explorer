@@ -2,28 +2,28 @@
 
     <div class="center">
         <br/>
-        <h3 class="center">Transaction Pusher</h3>
+        <h3 class="center">{{t_rawtx_title}}</h3>
     </div>
 
     <div class="center">
 
         {{#txs}}
-            <h3>Attempting to push tx: {{tx_hash}}</h3>
+            <h3>{{t_pushrawtx_attempting}}: {{tx_hash}}</h3>
         {{/txs}}
 
         {{#has_error}}
-            <h4 style="color:red">Attempt failed</h4>
+            <h4 style="color:red">{{t_common_attempt_failed}}</h4>
             <h4>{{error_msg}}</h4>
         {{/has_error}}
         {{^has_error}}
-            <h4 style="color:green">Success</h4>
+            <h4 style="color:green">{{t_common_success}}</h4>
             <h4>
-                Your tx should be already in the txpool waiting to be included
-                in an upcoming block.
+                {{t_pushrawtx_success_line1}}
+                {{t_pushrawtx_success_line2}}
             </h4>
 
             {{#txs}}
-                <h4>Go to tx: <a href="/tx/{{tx_hash}}">{{tx_hash}}</a></h4>
+                <h4>{{t_pushrawtx_go_to_tx}}: <a href="/tx/{{tx_hash}}?lang={{lang}}">{{tx_hash}}</a></h4>
             {{/txs}}
 
         {{/has_error}}

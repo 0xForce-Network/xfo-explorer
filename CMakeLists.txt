@@ -7,6 +7,7 @@ set(PROJECT_NAME
 project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
+add_definitions(-DCROW_USE_BOOST)
 
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O3")
@@ -14,7 +15,7 @@ endif()
 
 
 if (NOT MONERO_DIR)
-    set(MONERO_DIR ~/monero)
+    set(MONERO_DIR /workspace/xfo-core)
 endif()
 
 message(STATUS MONERO_DIR ": ${MONERO_DIR}")
@@ -29,9 +30,16 @@ if (NOT MONERO_BUILD_DIR)
     set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/release/
           CACHE PATH "Path to the build directory for Monero")
 
-   if (NOT EXISTS ${MONERO_BUILD_DIR})   
-        # try different location   
-        message(STATUS "Trying different folder for monero libraries")
+    if (NOT EXISTS ${MONERO_BUILD_DIR})
+        # xfo-core current branch output path
+        message(STATUS "Trying xfo-core Linux/main release folder for libraries")
+        set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/Linux/main/release/
+            CACHE PATH "Path to the build directory for Monero" FORCE)
+    endif()
+
+    if (NOT EXISTS ${MONERO_BUILD_DIR})
+        # legacy path used by some Monero examples
+        message(STATUS "Trying legacy Linux/master release folder for libraries")
         set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/Linux/master/release/
             CACHE PATH "Path to the build directory for Monero" FORCE)
     endif()
@@ -147,7 +155,6 @@ set(LIBRARIES
         ${WALLET_CRYPTO} 
         multisig
         daemonizer
-        blocks
         lmdb
         ringct
         ringct_basic

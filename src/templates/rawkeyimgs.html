@@ -2,23 +2,23 @@
 
     <div class="center">
         <br/>
-        <h3 class="center">Signed Key Images Checker</h3>
+        <h3 class="center">{{t_rawkeyimgs_title}}</h3>
     </div>
 
 
     <div class="center">
-        <form action="/checkrawkeyimgs" method="post" style="width:100%; margin-top:15px" class="style-1">
-            Paste base64 encoded, signed key images data here<br/>
-            (In Linux, can get base64 signed raw tx data: <i>base64 your_key_images_file | xclip -selection clipboard</i>)<br/>
-            (In Windows, can get base64 signed raw tx data: <i>certutil.exe -encode -f your_key_images_file encoded.txt & type "encoded.txt" | clip</i>)<br/>
+        <form action="/checkrawkeyimgs?lang={{lang}}" method="post" style="width:100%; margin-top:15px" class="style-1">
+            {{t_rawkeyimgs_intro}}<br/>
+            {{t_rawkeyimgs_linux_hint}}<br/>
+            {{t_rawkeyimgs_windows_hint}}<br/>
             <textarea name="rawkeyimgsdata" rows="20" cols="80"></textarea><br/><br/>
-            Viewkey (<i>key image file data is encoded using your viewkey. Thus is needed for decryption</i>)
+            {{t_rawkeyimgs_viewkey_label}}
             <br/>
-            Note: data and viewkey are sent to the server, as the calculations are done on the server side
+            {{t_rawkeyimgs_server_note}}
             <br/>
             <input type="text"  name="viewkey" size="80">
             <br/>
-            <input type="submit" name="action" value="check">
+            <button type="submit" name="action" value="check">{{t_common_check}}</button>
         </form>
     </div>
 

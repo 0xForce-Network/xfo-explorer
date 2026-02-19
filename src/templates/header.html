@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{lang}}">
 <head>
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="about:blank">
@@ -7,27 +7,34 @@
     {{#refresh}}
         <meta http-equiv="refresh" content="10">
     {{/refresh}}
-    <title>Onion Monero Blockchain Explorer</title>
+    <title>{{t_header_title}}</title>
     <!--<link rel="stylesheet" type="text/css" href="/css/style.css">-->
     <style type="text/css">
         {{#css_styles}}{{/css_styles}}
     </style>
 
 </head>
-<body>
+<body class="bg-background">
 <div>
 
-    <div class="center">
-        <h1 class="center"><a href="/">Onion Monero Blockchain Explorer</a></h1>
-        <h4 style="font-size: 15px; margin: 0px">(no javascript - no cookies - no web analytics trackers - no images - open sourced)</h4>
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
+        <h1 class="center xfo-title text-primary"><a href="/?lang={{lang}}">{{t_header_title}}</a></h1>
+        <h4 class="subtext" style="font-size: 14px; margin: 0px">{{t_header_tagline}}</h4>
+        <h5 class="subtext" style="font-size: 12px; margin: 8px 0 0 0">
+            {{t_header_lang_label}}:
+            <a href="/?lang=en">EN</a> |
+            <a href="/?lang=zh-TW">繁中</a> |
+            <a href="/?lang=es">ES</a>
+        </h5>
     </div>
 
 
-    <div class="center">
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
         <form action="/search" method="get" style="width:100%; margin-top:15px" class="style-1">
-            <input type="text" name="value" size="120"
-                   placeholder="block height, block hash, transaction hash">
-            <input type="submit" value="Search">
+            <input class="font-mono" type="text" name="value" size="120"
+                   placeholder="{{t_header_search_placeholder}}">
+            <input type="hidden" name="lang" value="{{lang}}">
+            <input type="submit" value="{{t_common_search}}">
         </form>
     </div>
 

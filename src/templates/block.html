@@ -1,40 +1,49 @@
 
-<div>
+<div class="center glass-panel bg-surface border-primary backdrop-blur-md">
 
-    <H4>Block hash (height): {{blk_hash}} ({{blk_height}})</H4>
+    <H4 class="text-primary">{{t_block_block_hash_height}}: <span class="mono">{{blk_hash}}</span> ({{blk_height}})</H4>
 
 
     {{#have_prev_hash}}
-    <H5>Previous block: <a href="/block/{{prev_hash}}">{{prev_hash}}</a></H5>
+    <H5>{{t_block_previous_block}}: <a href="/block/{{prev_hash}}?lang={{lang}}">{{prev_hash}}</a></H5>
     {{/have_prev_hash}}
 
     {{#have_next_hash}}
-    <H5>Next block: <a href="/block/{{next_hash}}">{{next_hash}}</a></H5>
+    <H5>{{t_block_next_block}}: <a href="/block/{{next_hash}}?lang={{lang}}">{{next_hash}}</a></H5>
     {{/have_next_hash}}
 
 
 
     <table class="center">
         <tr>
-            <td>Timestamp [UTC] (epoch):</td><td>{{blk_timestamp}} ({{blk_timestamp_epoch}})</td>
-            <td>Age {{age_format}}:</td><td>{{blk_age}}</td>
-            <td>Δ [h:m:s]:</td><td>{{delta_time}}</td>
+            <td>{{t_block_timestamp_utc_epoch}}:</td><td>{{blk_timestamp}} ({{blk_timestamp_epoch}})</td>
+            <td>{{t_index_age}} {{age_format}}:</td><td>{{blk_age}}</td>
+            <td>{{t_block_delta_hms}}:</td><td>{{delta_time}}</td>
         </tr>
         <tr>
-            <td>Major.minor version:</td><td>{{major_ver}}.{{minor_ver}}</td>
-            <td>Block reward:</td><td>{{blk_reward}}</td>
-            <td>Block size [kB]:</td><td>{{blk_size}}</td>
+            <td>{{t_block_major_minor_version}}:</td><td>{{major_ver}}.{{minor_ver}}</td>
+            <td>{{t_block_miner_reward}}:</td><td class="value-positive">{{blk_reward}}</td>
+            <td>{{t_block_block_size_kb}}:</td><td>{{blk_size}}</td>
         </tr>
         <tr>
-            <td>nonce:</td><td>{{blk_nonce}}</td>
-            <td>Total fees:</td><td>{{sum_fees}}</td>
-            <td>No of txs:</td><td>{{no_txs}}</td>
+            <td>{{t_block_nonce}}:</td><td>{{blk_nonce}}</td>
+            <td>{{t_block_total_fees}}:</td><td>{{sum_fees}}</td>
+            <td>{{t_block_no_of_txs}}:</td><td>{{no_txs}}</td>
         </tr>
         <tr>
-            <td>PoW hash:</td><td>{{blk_pow_hash}}</td>
-            <td>Difficulty:</td><td>{{blk_difficulty}}</td>
+            <td>{{t_block_reward_total}}:</td><td>{{blk_reward_total}}</td>
+            <td>{{t_block_governance_tax}}:</td><td class="value-positive">{{governance_tax}}</td>
+            <td>{{t_block_pow_mode}}:</td>
+            <td>
+                {{#is_cpu_block}}<span class="badge badge-cpu">{{t_index_cpu_randomx}}</span>{{/is_cpu_block}}
+                {{#is_gpu_block}}<span class="badge badge-gpu">{{t_index_gpu_oracle}}</span>{{/is_gpu_block}}
+            </td>
+        </tr>
+        <tr>
+            <td>{{t_block_pow_hash}}:</td><td>{{blk_pow_hash}}</td>
+            <td>{{t_block_difficulty}}:</td><td>{{blk_difficulty}}</td>
             {{#is_randomx}}
-                <td colspan="2"><a href="/randomx/{{blk_height}}">RandomX source code</a></td>
+                <td colspan="2"><a href="/randomx/{{blk_height}}?lang={{lang}}">{{t_block_randomx_source_code}}</a></td>
             {{/is_randomx}}
             {{^is_randomx}}
                 <td></td>
@@ -43,17 +52,17 @@
         </tr>
     </table>
 
-    <h3>Miner reward transaction</h3>
+    <h3>{{t_block_miner_reward_transaction}}</h3>
     <table class="center">
         <tr>
-            <td>hash</td>
-            <td>outputs</td>
-            <td>size [kB]</td>
+            <td>{{t_index_transaction_hash}}</td>
+            <td>{{t_index_outputs}}</td>
+            <td>{{t_index_size_kb}}</td>
             <td>version</td>
         </tr>
         {{#coinbase_txs}}
             <tr>
-                <td><a href="/tx/{{hash}}">{{hash}}</a>
+                <td><a href="/tx/{{hash}}?lang={{lang}}">{{hash}}</a>
                 <td>{{sum_outputs}}</td>
                 <td>{{tx_size}}</td>
                 <td>{{version}}</td>
@@ -64,20 +73,20 @@
 
 
 
-    <h3>Transactions ({{no_txs}})</h3>
+    <h3>{{t_block_transactions}} ({{no_txs}})</h3>
     {{#have_txs}}
         <table class="center" style="width:80%">
             <tr>
-                <td>hash</td>
-                <td>outputs</td>
-                <td>fee [&#181;&#x271]</td>
-                <td>in/out</td>
-                <td>size [kB]</td>
+                <td>{{t_index_transaction_hash}}</td>
+                <td>{{t_index_outputs}}</td>
+                <td>{{t_index_fee_micro}}</td>
+                <td>{{t_index_in_out}}</td>
+                <td>{{t_index_size_kb}}</td>
                 <td>version</td>
             </tr>
             {{#blk_txs}}
                 <tr>
-                    <td><a href="/tx/{{hash}}">{{hash}}</a></td>
+                    <td><a href="/tx/{{hash}}?lang={{lang}}">{{hash}}</a></td>
                     <td>{{sum_outputs}}</td>
                     <td>{{fee_micro}}</td>
                     <td>{{no_inputs}}/{{no_outputs}}</td>                    
@@ -91,8 +100,8 @@
 
     {{#enable_as_hex}}
         <h5 style="margin-top:1px">
-            <a href="/blockhex/{{blk_height}}">Block as hex</a>
-            | <a href="/blockhexcomplete/{{blk_height}}">Complete block as hex</a>
+            <a href="/blockhex/{{blk_height}}?lang={{lang}}">{{t_block_block_as_hex}}</a>
+            | <a href="/blockhexcomplete/{{blk_height}}?lang={{lang}}">{{t_block_complete_block_as_hex}}</a>
         </h5>
     {{/enable_as_hex}}
 

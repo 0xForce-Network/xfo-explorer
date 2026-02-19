@@ -3476,7 +3476,7 @@ void arg(WStringRef, const internal::NamedArg<Char>&) FMT_DELETED_OR_UNDEFINED;
 #define FMT_EXPAND(args) args
 
 // Returns the number of arguments.
-// Based on https://groups.google.com/forum/#!topic/comp.std.c/d-6Mj5Lko_s.
+// Based on an archived C/C++ standards discussion thread.
 #define FMT_NARG(...) FMT_NARG_(__VA_ARGS__, FMT_RSEQ_N())
 #define FMT_NARG_(...) FMT_EXPAND(FMT_ARG_N(__VA_ARGS__))
 #define FMT_ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
