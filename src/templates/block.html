@@ -1,5 +1,5 @@
 
-<div class="center glass-panel bg-surface border-primary backdrop-blur-md">
+<div class="center glass-panel bg-surface border-primary backdrop-blur-md stack-panel">
 
     <H4 class="text-primary">{{t_block_block_hash_height}}: <span class="mono">{{blk_hash}}</span> ({{blk_height}})</H4>
 
@@ -52,7 +52,7 @@
         </tr>
     </table>
 
-    <h3>{{t_block_miner_reward_transaction}}</h3>
+    <h3 class="section-title">{{t_block_miner_reward_transaction}}</h3>
     <table class="center">
         <tr>
             <td>{{t_index_transaction_hash}}</td>
@@ -73,7 +73,7 @@
 
 
 
-    <h3>{{t_block_transactions}} ({{no_txs}})</h3>
+    <h3 class="section-title">{{t_block_transactions}} ({{no_txs}})</h3>
     {{#have_txs}}
         <table class="center" style="width:80%">
             <tr>

@@ -1,6 +1,6 @@
 
 <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
-     <h3 style="font-size: 12px; margin-top: 20px">
+     <h3 class="status-line">
 
         {{t_index_server_time}}: {{server_timestamp}}  | <a href="/txpool?lang={{lang}}">{{t_index_transaction_pool}}</a>
          {{#enable_pusher}}
@@ -41,11 +41,11 @@
 
 
     {{#network_info}}
-        <h3 style="font-size: 12px; margin-top: 5px; margin-bottom: 3">
-            {{t_index_network_difficulty}}: {{difficulty}}
+        <h3 class="metric-line">
+            {{t_index_network_difficulty}}: <span class="metric-value">{{difficulty}}</span>
             | {{t_index_hard_fork}}: v{{current_hf_version}}
-            | {{t_index_hash_rate}}: {{hash_rate}}
-            | {{t_index_fee_per_byte}}: {{fee_per_kb}}
+            | {{t_index_hash_rate}}: <span class="metric-hot">{{hash_rate}}</span>
+            | {{t_index_fee_per_byte}}: <span class="metric-value">{{fee_per_kb}}</span>
             | {{t_index_median_block_size_limit}}: {{block_size_limit}} kB
             {{^is_current_info}}
             | {{t_index_data_from}} {{age}} {{age_format}} {{t_common_ago}}
@@ -54,8 +54,8 @@
     {{/network_info}}
 
     {{#emission}}
-        <h3 style="font-size: 12px; margin-top: 2px">
-            {{t_index_xfo_emission}} {{amount}} ({{fee_amount}}) {{t_index_as_of_block}} {{blk_no}} {{t_index_block_word}}
+        <h3 class="metric-line">
+            {{t_index_xfo_emission}} <span class="metric-hot">{{amount}}</span> ({{fee_amount}}) {{t_index_as_of_block}} {{blk_no}} {{t_index_block_word}}
         </h3>
     {{/emission}}
 
@@ -65,15 +65,15 @@
     {{{mempool_info}}}
 
     {{#is_page_zero}}
-      <h2 class="text-primary" style="margin-bottom: 0px">{{t_index_terminal_feed_last}} {{no_of_last_blocks}} {{t_index_terminal_feed_blocks}}</h2>
+      <h2 class="section-title">{{t_index_terminal_feed_last}} {{no_of_last_blocks}} {{t_index_terminal_feed_blocks}}</h2>
     {{/is_page_zero}}
     {{^is_page_zero}}
-      <h2 class="text-primary" style="margin-bottom: 0px">{{t_index_terminal_feed_historical}}</h2>
+      <h2 class="section-title">{{t_index_terminal_feed_historical}}</h2>
     {{/is_page_zero}}
 
-    <h4 class="subtext" style="font-size: 14px; margin-top: 0px">({{t_index_median_size_100}}: {{blk_size_median}} kB)</h4>
+    <h4 class="subtext" style="font-size: 14px; margin-top: 0px; text-align:center">({{t_index_median_size_100}}: {{blk_size_median}} kB)</h4>
 
-    <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md stack-panel">
 
             <table class="center">
                 <tr>

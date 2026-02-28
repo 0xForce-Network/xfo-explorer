@@ -1,6 +1,6 @@
 
 <div class="center">
-     <h3 style="font-size: 12px; margin-top: 20px">
+     <h3 class="status-line">
      {{#refresh}}
          <a href="/tx/{{tx_hash}}?lang={{lang}}">{{t_index_autorefresh_on}}</a>
      {{/refresh}}
@@ -13,7 +13,7 @@
 <div>
 
     {{#has_error}}
-        <h4 style="color:red">{{t_common_attempt_failed}}</h4>
+        <h4 style="color:red" class="section-title">{{t_common_attempt_failed}}</h4>
         {{#error_tx_not_found}}
             <h4>{{t_tx_not_found_prefix}} {{tx_hash}} {{t_tx_not_found_suffix}}</h4>
             <div class="center" style="text-align: center;width:80%">
@@ -26,8 +26,10 @@
         {{/error_tx_not_found}}
     {{/has_error}}
     {{^has_error}}
-        {{#txs}}
-            {{>tx_details}}
-        {{/txs}}
+        <div class="center glass-panel bg-surface border-primary backdrop-blur-md stack-panel">
+            {{#txs}}
+                {{>tx_details}}
+            {{/txs}}
+        </div>
     {{/has_error}}
 </div>

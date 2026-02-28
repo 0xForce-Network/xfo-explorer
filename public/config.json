@@ -1,0 +1,21 @@
+{
+  "services": {
+    "oracleApiBase": "https://oracle.0xforce.network",
+    "coreRepo": "https://github.com/0xForce-Network/xfo-core",
+    "walletBase": "https://wallet.0xforce.network",
+    "poolBase": "https://pool.0xforce.network",
+    "websiteBase": "https://0xforce.network"
+  },
+  "navigation": {
+    "websiteLabel": "0xForce Official",
+    "websiteUrl": "https://0xforce.network",
+    "walletLabel": "Wallet",
+    "walletUrl": "https://wallet.0xforce.network",
+    "poolLabel": "Pool",
+    "poolUrl": "https://pool.0xforce.network",
+    "oracleLabel": "Oracle",
+    "oracleUrl": "https://oracle.0xforce.network",
+    "coreLabel": "Core",
+    "coreUrl": "https://github.com/0xForce-Network/xfo-core"
+  }
+}

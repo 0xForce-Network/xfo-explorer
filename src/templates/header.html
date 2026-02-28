@@ -14,13 +14,23 @@
     </style>
 
 </head>
-<body class="bg-background">
-<div>
+<body class="bg-background terminal-grid">
+<div class="page-shell">
 
-    <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md top-nav-wrap">
+        <div class="top-nav mono" id="top-ecosystem-nav">
+            <a id="nav-website" href="https://0xforce.network" target="_blank" rel="noopener noreferrer">0xForce Official</a>
+            <a id="nav-wallet" href="https://wallet.0xforce.network" target="_blank" rel="noopener noreferrer">Wallet</a>
+            <a id="nav-pool" href="https://pool.0xforce.network" target="_blank" rel="noopener noreferrer">Pool</a>
+            <a id="nav-oracle" href="https://oracle.0xforce.network" target="_blank" rel="noopener noreferrer">Oracle</a>
+            <a id="nav-core" href="https://github.com/0xForce-Network/xfo-core" target="_blank" rel="noopener noreferrer">Core</a>
+        </div>
+    </div>
+
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md top-hero">
         <h1 class="center xfo-title text-primary"><a href="/?lang={{lang}}">{{t_header_title}}</a></h1>
-        <h4 class="subtext" style="font-size: 14px; margin: 0px">{{t_header_tagline}}</h4>
-        <h5 class="subtext" style="font-size: 12px; margin: 8px 0 0 0">
+        <h4 class="subtext top-tagline">{{t_header_tagline}}</h4>
+        <h5 class="subtext top-lang-switch">
             {{t_header_lang_label}}:
             <a href="/?lang=en">EN</a> |
             <a href="/?lang=zh-TW">繁中</a> |
@@ -29,8 +39,9 @@
     </div>
 
 
-    <div class="center glass-panel bg-surface border-primary backdrop-blur-md">
-        <form action="/search" method="get" style="width:100%; margin-top:15px" class="style-1">
+    <div class="center glass-panel bg-surface border-primary backdrop-blur-md omni-search-panel">
+        <div class="omni-title mono">OMNI SEARCH // BLOCK · TX · ADDRESS</div>
+        <form action="/search" method="get" style="width:100%; margin-top:15px" class="style-1 omni-search-form">
             <input class="font-mono" type="text" name="value" size="120"
                    placeholder="{{t_header_search_placeholder}}">
             <input type="hidden" name="lang" value="{{lang}}">
@@ -39,3 +50,27 @@
     </div>
 
 </div>
+
+<script>
+(() => {
+  const setLink = (id, href, label) => {
+    const el = document.getElementById(id);
+    if (!el || !href) return;
+    el.href = href;
+    if (label) el.textContent = label;
+  };
+
+  fetch('/config.json', { cache: 'no-store' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((cfg) => {
+      if (!cfg || !cfg.navigation) return;
+      const n = cfg.navigation;
+      setLink('nav-website', n.websiteUrl, n.websiteLabel || '0xForce Official');
+      setLink('nav-wallet', n.walletUrl, n.walletLabel || 'Wallet');
+      setLink('nav-pool', n.poolUrl, n.poolLabel || 'Pool');
+      setLink('nav-oracle', n.oracleUrl, n.oracleLabel || 'Oracle');
+      setLink('nav-core', n.coreUrl, n.coreLabel || 'Core');
+    })
+    .catch(() => {});
+})();
+</script>

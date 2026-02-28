@@ -338,6 +338,60 @@ main(int ac, const char* av[])
         xmrblocks.set_request_locale(locale ? string(locale) : string{"en"});
     };
 
+    auto serve_public_file = [](const string& rel_path,
+                                const string& content_type,
+                                bool binary = false) -> crow::response
+    {
+        const string full_path = string{"./public/"} + rel_path;
+
+        std::ifstream in;
+        if (binary)
+            in.open(full_path, std::ios::binary);
+        else
+            in.open(full_path);
+
+        if (!in.good())
+            return crow::response(404, "Not Found");
+
+        std::ostringstream ss;
+        ss << in.rdbuf();
+
+        crow::response r{ss.str()};
+        r.add_header("Content-Type", content_type);
+        return r;
+    };
+
+    auto is_safe_filename = [](const string& value) {
+        static const std::regex re("^[A-Za-z0-9._-]+$");
+        return std::regex_match(value, re);
+    };
+
+    auto is_safe_locale = [](const string& value) {
+        static const std::regex re("^[A-Za-z0-9-]+$");
+        return std::regex_match(value, re);
+    };
+
+    CROW_ROUTE(app, "/config.json")
+    ([&](const crow::request&) {
+        return serve_public_file("config.json", "application/json; charset=utf-8");
+    });
+
+    CROW_ROUTE(app, "/fonts/<string>")
+    ([&](const crow::request&, string filename) {
+        if (!is_safe_filename(filename))
+            return crow::response(400, "Bad Request");
+        return serve_public_file(string{"fonts/"} + filename, "font/woff2", true);
+    });
+
+    CROW_ROUTE(app, "/locales/<string>/<string>")
+    ([&](const crow::request&, string lang, string filename) {
+        if (!is_safe_locale(lang) || !is_safe_filename(filename))
+            return crow::response(400, "Bad Request");
+        return serve_public_file(
+            string{"locales/"} + lang + "/" + filename,
+            "application/json; charset=utf-8");
+    });
+
     CROW_ROUTE(app, "/")
     ([&](const crow::request& req) {
         apply_locale(req);
