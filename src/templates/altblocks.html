@@ -1,15 +1,15 @@
 <h2 class="section-title">
-   Alternative blocks
+   {{#t}}altblocks.title{{/t}}
 </h2>
-<h4 class="subtext" style="font-size: 14px; margin-top: 0px; text-align:center">(no of alt blocks: {{no_alt_blocks}})</h4>
+<h4 class="subtext" style="font-size: 14px; margin-top: 0px; text-align:center">({{#t}}altblocks.count{{/t}}: {{no_alt_blocks}})</h4>
 <div class="center glass-panel bg-surface border-primary backdrop-blur-md stack-panel">
     
       <table class="center" style="width:80%">
             <tr>
-                <td>height</td>
-                <td>age</td>
-                <td>hash</td>
-                <td>txs no</td>
+                <td>{{t_index_height}}</td>
+                <td>{{t_index_age}}</td>
+                <td>{{#t}}common.hash{{/t}}</td>
+                <td>{{#t}}altblocks.txs_no{{/t}}</td>
             </tr>
             {{#blocks}}
             <tr>

@@ -18,29 +18,30 @@
 <div class="page-shell">
 
     <div class="center glass-panel bg-surface border-primary backdrop-blur-md top-nav-wrap">
-        <div class="top-nav mono" id="top-ecosystem-nav">
-            <a id="nav-website" href="https://0xforce.network" target="_blank" rel="noopener noreferrer">0xForce Official</a>
-            <a id="nav-wallet" href="https://wallet.0xforce.network" target="_blank" rel="noopener noreferrer">Wallet</a>
-            <a id="nav-pool" href="https://pool.0xforce.network" target="_blank" rel="noopener noreferrer">Pool</a>
-            <a id="nav-oracle" href="https://oracle.0xforce.network" target="_blank" rel="noopener noreferrer">Oracle</a>
-            <a id="nav-core" href="https://github.com/0xForce-Network/xfo-core" target="_blank" rel="noopener noreferrer">Core</a>
+        <div class="top-nav-row">
+            <div class="top-nav mono" id="top-ecosystem-nav">
+                <a id="nav-website" href="https://0xforce.network" target="_blank" rel="noopener noreferrer">{{#t}}nav.website{{/t}}</a>
+                <a id="nav-wallet" href="https://wallet.0xforce.network" target="_blank" rel="noopener noreferrer">{{#t}}nav.wallet{{/t}}</a>
+                <a id="nav-pool" href="https://pool.0xforce.network" target="_blank" rel="noopener noreferrer">{{#t}}nav.pool{{/t}}</a>
+                <a id="nav-oracle" href="https://oracle.0xforce.network" target="_blank" rel="noopener noreferrer">{{#t}}nav.oracle{{/t}}</a>
+                <a id="nav-core" href="https://github.com/0xForce-Network/xfo-core" target="_blank" rel="noopener noreferrer">{{#t}}nav.core{{/t}}</a>
+            </div>
+            <div class="lang-switch mono" aria-label="language switcher">
+                <a href="/?lang=en" class="{{#lang_is_en}}active{{/lang_is_en}}">EN</a>
+                <a href="/?lang=zh-TW" class="{{#lang_is_zh}}active{{/lang_is_zh}}">TW</a>
+                <a href="/?lang=es" class="{{#lang_is_es}}active{{/lang_is_es}}">ES</a>
+            </div>
         </div>
     </div>
 
     <div class="center glass-panel bg-surface border-primary backdrop-blur-md top-hero">
         <h1 class="center xfo-title text-primary"><a href="/?lang={{lang}}">{{t_header_title}}</a></h1>
         <h4 class="subtext top-tagline">{{t_header_tagline}}</h4>
-        <h5 class="subtext top-lang-switch">
-            {{t_header_lang_label}}:
-            <a href="/?lang=en">EN</a> |
-            <a href="/?lang=zh-TW">繁中</a> |
-            <a href="/?lang=es">ES</a>
-        </h5>
     </div>
 
 
     <div class="center glass-panel bg-surface border-primary backdrop-blur-md omni-search-panel">
-        <div class="omni-title mono">OMNI SEARCH // BLOCK · TX · ADDRESS</div>
+        <div class="omni-title mono">{{#t}}header.omni_title{{/t}}</div>
         <form action="/search" method="get" style="width:100%; margin-top:15px" class="style-1 omni-search-form">
             <input class="font-mono" type="text" name="value" size="120"
                    placeholder="{{t_header_search_placeholder}}">
@@ -65,11 +66,11 @@
     .then((cfg) => {
       if (!cfg || !cfg.navigation) return;
       const n = cfg.navigation;
-      setLink('nav-website', n.websiteUrl, n.websiteLabel || '0xForce Official');
-      setLink('nav-wallet', n.walletUrl, n.walletLabel || 'Wallet');
-      setLink('nav-pool', n.poolUrl, n.poolLabel || 'Pool');
-      setLink('nav-oracle', n.oracleUrl, n.oracleLabel || 'Oracle');
-      setLink('nav-core', n.coreUrl, n.coreLabel || 'Core');
+      setLink('nav-website', n.websiteUrl, n.websiteLabel || '{{#t}}nav.website{{/t}}');
+      setLink('nav-wallet', n.walletUrl, n.walletLabel || '{{#t}}nav.wallet{{/t}}');
+      setLink('nav-pool', n.poolUrl, n.poolLabel || '{{#t}}nav.pool{{/t}}');
+      setLink('nav-oracle', n.oracleUrl, n.oracleLabel || '{{#t}}nav.oracle{{/t}}');
+      setLink('nav-core', n.coreUrl, n.coreLabel || '{{#t}}nav.core{{/t}}');
     })
     .catch(() => {});
 })();

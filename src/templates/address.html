@@ -1,34 +1,33 @@
 
 <div class="center glass-panel bg-surface border-primary backdrop-blur-md stack-panel">
     <br/>
-    <H4 style="margin:5px">Address:<br/>{{xmr_address}}</H4>
+    <H4 style="margin:5px">{{#t}}address.address{{/t}}:<br/>{{xmr_address}}</H4>
     <br/>
 
     {{#testnet}}
-        <H4 style="margin:5px">Network type: Testnet</H4>
+        <H4 style="margin:5px">{{#t}}address.network_type{{/t}}: {{#t}}address.testnet{{/t}}</H4>
     {{/testnet}}
     {{#stagenet}}
-        <H4 style="margin:5px">Network type: Stagenet</H4>
+        <H4 style="margin:5px">{{#t}}address.network_type{{/t}}: {{#t}}address.stagenet{{/t}}</H4>
     {{/stagenet}}
     {{^testnet}}{{^stagenet}}
-        <H4 style="margin:5px">Network type: Mainnet</H4>
+        <H4 style="margin:5px">{{#t}}address.network_type{{/t}}: {{#t}}address.mainnet{{/t}}</H4>
     {{/stagenet}}{{/testnet}}
 
     <br/>
-    <H4 style="margin:5px">Associated public keys</H4>
+    <H4 style="margin:5px">{{#t}}address.associated_public_keys{{/t}}</H4>
 
-    <H4 style="margin:5px">View key: {{public_viewkey}}</H4>
-    <H4 style="margin:5px">Spend key: {{public_spendkey}}</H4>
+    <H4 style="margin:5px">{{#t}}address.view_key{{/t}}: {{public_viewkey}}</H4>
+    <H4 style="margin:5px">{{#t}}address.spend_key{{/t}}: {{public_spendkey}}</H4>
     <br/>
 
     {{#is_integrated_addr}}
-        <H4 style="margin:5px">Payment id: {{encrypted_payment_id}}</H4>
+        <H4 style="margin:5px">{{#t}}address.payment_id{{/t}}: {{encrypted_payment_id}}</H4>
     {{/is_integrated_addr}}
 
 
     <H4 style="margin:5px">
-        Transactions:<br/> Sorry, its not possible to find txs associated with
-        normal addresses in Monero
+        {{#t}}address.transactions{{/t}}:<br/> {{#t}}address.no_txs_for_normal{{/t}}
     </H4>
 
     <br/>

@@ -7198,8 +7198,15 @@ add_css_style(mstch::map& context)
         return template_file["css_styles"];
     }};
 
+    context["t"] = mstch::lambda{[this](const std::string& text) -> mstch::node {
+        return translate(boost::algorithm::trim_copy(text));
+    }};
+
     const string locale = normalize_locale(request_locale);
     context["lang"] = locale;
+    context["lang_is_en"] = (locale == "en");
+    context["lang_is_zh"] = (locale == "zh-TW");
+    context["lang_is_es"] = (locale == "es");
     context["t_common_search"] = translate("common.search");
     context["t_common_ago"] = translate("common.ago");
     context["t_header_title"] = translate("header.title");

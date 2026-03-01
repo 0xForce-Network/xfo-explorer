@@ -141,6 +141,46 @@ input, button {
     justify-content: center;
 }
 
+.top-nav-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: stretch;
+}
+
+.lang-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    align-self: center;
+    padding: 0.3rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 2px solid #22d3ee;
+    border-radius: 10px;
+}
+
+.lang-switch a {
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all .2s ease;
+}
+
+.lang-switch a:hover {
+    border-color: rgba(34, 211, 238, 0.5);
+    background: rgba(34, 211, 238, 0.1);
+    text-decoration: none;
+}
+
+.lang-switch a.active {
+    border-color: rgba(34, 211, 238, 0.55);
+    background: rgba(34, 211, 238, 0.14);
+    color: #22d3ee;
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+}
+
 .top-nav a {
     display: inline-flex;
     align-items: center;
@@ -354,5 +394,15 @@ input[type="submit"]:hover {
 
     .omni-search-form input[type="text"] {
         flex: 1;
+    }
+
+    .top-nav-row {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .lang-switch {
+        align-self: auto;
     }
 }
