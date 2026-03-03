@@ -1,6 +1,10 @@
 <tr>
         <td>{{timestamp}}</td>
         <td><a href="/tx/{{hash}}">{{hash}}</a></td>
+	<td>
+		{{#is_cpu_block}}<span class="cpu-tag">CPU</span>{{/is_cpu_block}}
+		{{#is_gpu_block}}<span class="gpu-tag">GPU</span>{{/is_gpu_block}}
+	</td>
 	<td>{{sum_outputs}}</td>
 	<td>{{tx_fee}}</td>
 	<td>{{mixin}}</td>

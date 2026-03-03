@@ -757,6 +757,10 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
             txd_map.insert({"pow_type"  , blk_pow_type});
             txd_map.insert({"is_cpu_block", (blk_pow_type == 0)});
             txd_map.insert({"is_gpu_block", (blk_pow_type > 0)});
+            txd_map.insert({"pow_layer", get_pow_layer_str(blk)});
+            txd_map.insert({"producer_type", get_producer_type_str(blk)});
+            txd_map.insert({"producer_id", get_producer_id(blk)});
+            txd_map.insert({"producer_alias", get_producer_alias(blk)});
 
 
             // do not show block info for other than first tx in a block
@@ -1184,6 +1188,10 @@ show_block(uint64_t _blk_height)
             {"pow_type"             , pow_type},
             {"is_cpu_block"         , (pow_type == 0)},
             {"is_gpu_block"         , (pow_type > 0)},
+            {"pow_layer"            , get_pow_layer_str(blk)},
+            {"producer_type"        , get_producer_type_str(blk)},
+            {"producer_id"          , get_producer_id(blk)},
+            {"producer_alias"       , get_producer_alias(blk)},
             {"is_randomx"           , (blk.major_version >= 12
                                             && enable_randomx == true)},
             {"blk_difficulty"       , blk_difficulty.str()},
@@ -4915,6 +4923,10 @@ json_block(string block_no_or_hash)
             {"block_height"  , block_height},
             {"hash"          , pod_to_hex(blk_hash)},
             {"pow_type"      , get_pow_type(blk)},
+            {"pow_layer"     , get_pow_layer_str(blk)},
+            {"producer_type" , get_producer_type_str(blk)},
+            {"producer_id"   , get_producer_id(blk)},
+            {"producer_alias", get_producer_alias(blk)},
             {"timestamp"     , blk.timestamp},
             {"timestamp_utc" , xmreg::timestamp_to_str_gm(blk.timestamp)},
             {"block_height"  , block_height},
@@ -7392,6 +7404,32 @@ get_pow_type(const T& blk)
     }
 
     return 0;
+}
+
+static string
+get_pow_layer_str(const block& blk)
+{
+    return (get_pow_type(blk) == 0) ? "L1-CPU" : "L2-GPU";
+}
+
+static string
+get_producer_type_str(const block& blk)
+{
+    return (get_pow_type(blk) == 0) ? "miner" : "oracle-gpu";
+}
+
+static string
+get_producer_id(const block& blk)
+{
+    (void) blk;
+    return "N/A";
+}
+
+static string
+get_producer_alias(const block& blk)
+{
+    (void) blk;
+    return "";
 }
 
 vector<randomx_status>
