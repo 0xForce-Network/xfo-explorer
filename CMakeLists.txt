@@ -9,6 +9,15 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
 add_definitions(-DCROW_USE_BOOST)
 
+# --- Semi-static linking defaults (Linux) ---
+# NOTE: -static-libgcc -static-libstdc++ was REMOVED because shared deps
+# (libzmq, libunbound, etc.) transitively load the dynamic copies anyway,
+# creating a dual-runtime conflict that causes SIGABRT on shutdown.
+# Boost is still linked statically via Boost_USE_STATIC_LIBS ON.
+
+# Prefer static Boost libraries
+set(Boost_USE_STATIC_LIBS ON)
+
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O3")
 endif()
