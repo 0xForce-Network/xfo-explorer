@@ -1,20 +1,20 @@
 {
   "services": {
-    "oracleApiBase": "https://oracle.0xforce.network",
+    "oracleApiBase": "https://local.xfo.network:8885",
     "coreRepo": "https://github.com/0xForce-Network/xfo-core",
-    "walletBase": "https://wallet.0xforce.network",
-    "poolBase": "https://pool.0xforce.network",
-    "websiteBase": "https://0xforce.network"
+    "walletBase": "https://local.xfo.network:8880",
+    "poolBase": "https://local.xfo.network:8881",
+    "websiteBase": "https://local.xfo.network:8883"
   },
   "navigation": {
     "websiteLabel": "0xForce Official",
-    "websiteUrl": "https://0xforce.network",
+    "websiteUrl": "https://local.xfo.network:8883",
     "walletLabel": "Wallet",
-    "walletUrl": "https://wallet.0xforce.network",
+    "walletUrl": "https://local.xfo.network:8880",
     "poolLabel": "Pool",
-    "poolUrl": "https://pool.0xforce.network",
+    "poolUrl": "https://local.xfo.network:8881",
     "oracleLabel": "Oracle",
-    "oracleUrl": "https://oracle.0xforce.network",
+    "oracleUrl": "https://local.xfo.network:8885",
     "coreLabel": "Core",
     "coreUrl": "https://github.com/0xForce-Network/xfo-core"
   }
